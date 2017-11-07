@@ -1,5 +1,6 @@
-﻿using Orleans.Runtime.Configuration;
-using Orleans.Runtime.Host;
+﻿using Echo.Grains;
+using Orleans.Hosting;
+using Orleans.Runtime.Configuration;
 using System;
 using System.Threading.Tasks;
 
@@ -7,25 +8,24 @@ namespace Echo.Host
 {
 	public static class Program
 	{
-		private const string SiloName = "EchoSilo";
-
 		public static async Task Main(string[] args)
 		{
-			await Console.Out.WriteLineAsync($"{Program.SiloName} is starting...");
+			await Console.Out.WriteLineAsync($"Orleans silo is starting...");
 
-			var siloConfiguration = ClusterConfiguration.LocalhostPrimarySilo();
-			siloConfiguration.Defaults.TraceFilePattern = null;
-			siloConfiguration.Defaults.TraceToConsole = false;
+			var configuration = ClusterConfiguration.LocalhostPrimarySilo();
+			var builder = new SiloHostBuilder()
+				.UseConfiguration(configuration)
+				.AddApplicationPartsFromReferences(typeof(EchoGrain).Assembly);
 
-			var silo = new SiloHost(Program.SiloName, siloConfiguration);
-			silo.InitializeOrleansSilo();
-			silo.StartOrleansSilo();
+			var host = builder.Build();
+			await host.StartAsync();
 
-			await Console.Out.WriteLineAsync($"{Program.SiloName} is available.");
-			await Console.Out.WriteLineAsync($"Press Enter to shutdown {Program.SiloName}...");
+			await Console.Out.WriteLineAsync($"Orleans silo is available.");
+			await Console.Out.WriteLineAsync($"Press Enter to terminate...");
 			await Console.In.ReadLineAsync();
 
-			silo.ShutdownOrleansSilo();
+			await host.StopAsync();
+			await Console.Out.WriteLineAsync("Orleans silo is terminated.");
 		}
 	}
 }

@@ -11,10 +11,7 @@ namespace Echo.Grains
 	{
 		public async Task SpeakAsync(EchoSpeakMessage message)
 		{
-			if (message == null)
-			{
-				throw new ArgumentNullException(nameof(message));
-			}
+			message = message ?? throw new ArgumentNullException(nameof(message));
 
 			for(var i = 0; i < message.Repeat; i++)
 			{

@@ -60,7 +60,6 @@ namespace Echo.Client
 					client = new ClientBuilder()
 						.UseConfiguration(configuration)
 						.AddApplicationPartsFromReferences(typeof(IEchoGrain).Assembly)
-						//.ConfigureLogging(logging => logging.AddConsole())
 						.Build();
 
 					await client.Connect();
@@ -71,7 +70,8 @@ namespace Echo.Client
 				{
 					attempt++;
 
-					Console.WriteLine($"Attempt {attempt} of {initializeAttemptsBeforeFailing} failed to initialize the Orleans client.");
+					await Console.Out.WriteLineAsync(
+						$"Attempt {attempt} of {initializeAttemptsBeforeFailing} failed to initialize the Orleans client.");
 
 					if (attempt > initializeAttemptsBeforeFailing)
 					{

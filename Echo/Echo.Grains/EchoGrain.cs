@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using Echo.Contracts;
+﻿using Echo.Contracts;
 using Echo.Contracts.Messages;
-using System;
 using Orleans;
+using System;
+using System.Threading.Tasks;
 
 namespace Echo.Grains
 {
@@ -11,9 +11,9 @@ namespace Echo.Grains
 	{
 		public async Task SpeakAsync(EchoSpeakMessage message)
 		{
-			message = message ?? throw new ArgumentNullException(nameof(message));
+			if (message == null) { throw new ArgumentNullException(nameof(message)); }
 
-			for(var i = 0; i < message.Repeat; i++)
+			for (var i = 0; i < message.Repeat; i++)
 			{
 				await Console.Out.WriteLineAsync(
 					$"{i} - {message.Message}");

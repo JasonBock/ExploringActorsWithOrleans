@@ -1,12 +1,9 @@
 ﻿using Failures.Contracts;
 using Orleans;
-using Orleans.ApplicationParts;
 using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
-using Orleans.Serialization;
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Failures.Client
@@ -62,7 +59,6 @@ namespace Failures.Client
 				try
 				{
 					var configuration = ClientConfiguration.LocalhostSilo();
-					//configuration.FallbackSerializationProvider = typeof(ILBasedSerializer).GetTypeInfo();
 
 					client = new ClientBuilder()
 						.UseConfiguration(configuration)

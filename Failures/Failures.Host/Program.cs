@@ -1,11 +1,8 @@
 ﻿using Failures.Grains;
 using Orleans;
-using Orleans.ApplicationParts;
 using Orleans.Hosting;
 using Orleans.Runtime.Configuration;
-using Orleans.Serialization;
 using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Failures.Host
@@ -17,11 +14,11 @@ namespace Failures.Host
 			await Console.Out.WriteLineAsync($"Orleans silo is starting...");
 
 			var configuration = ClusterConfiguration.LocalhostPrimarySilo();
-			//configuration.Globals.FallbackSerializationProvider = typeof(ILBasedSerializer).GetTypeInfo();
 
 			var builder = new SiloHostBuilder()
 				.UseConfiguration(configuration)
-				.ConfigureApplicationParts(manager => manager.AddApplicationPart(typeof(CalculatorGrain).Assembly));
+				.ConfigureApplicationParts(
+					manager => manager.AddApplicationPart(typeof(CalculatorGrain).Assembly).WithReferences());
 
 			var host = builder.Build();
 			await host.StartAsync();

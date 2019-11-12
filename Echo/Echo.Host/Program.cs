@@ -1,31 +1,42 @@
-﻿using Echo.Grains;
-using Orleans.Hosting;
-using Orleans.Runtime.Configuration;
-using System;
+﻿using System.Net;
 using System.Threading.Tasks;
+using Echo.Grains;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Orleans;
+using Orleans.Configuration;
+using Orleans.Hosting;
 
 namespace Echo.Host
 {
 	public static class Program
 	{
-		public static async Task Main(string[] args)
-		{
-			await Console.Out.WriteLineAsync($"Orleans silo is starting...");
-
-			var configuration = ClusterConfiguration.LocalhostPrimarySilo();
-			var builder = new SiloHostBuilder()
-				.UseConfiguration(configuration)
-				.AddApplicationPartsFromReferences(typeof(EchoGrain).Assembly);
-
-			var host = builder.Build();
-			await host.StartAsync();
-
-			await Console.Out.WriteLineAsync($"Orleans silo is available.");
-			await Console.Out.WriteLineAsync($"Press Enter to terminate...");
-			await Console.In.ReadLineAsync();
-
-			await host.StopAsync();
-			await Console.Out.WriteLineAsync("Orleans silo is terminated.");
-		}
+		public static Task Main(string[] args) => 
+			new HostBuilder()
+				 .UseOrleans(builder =>
+				 {
+					 builder.UseLocalhostClustering()
+						.Configure<ClusterOptions>(options =>
+						{
+							options.ClusterId = "dev";
+							options.ServiceId = "Echo.Host";
+						})
+						.Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+						.ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(EchoGrain).Assembly).WithReferences())
+						.AddMemoryGrainStorage(name: "ArchiveStorage");
+				 })
+				 .ConfigureServices(services =>
+				 {
+					 services.Configure<ConsoleLifetimeOptions>(options =>
+					 {
+						 options.SuppressStatusMessages = true;
+					 });
+				 })
+				 .ConfigureLogging(builder =>
+				 {
+					 builder.AddConsole();
+				 })
+				 .RunConsoleAsync();
 	}
 }
